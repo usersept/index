@@ -22,6 +22,8 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 400px;
+      overflow-anchor: none; /* Désactiver scroll anchoring */
+      overscroll-behavior: none; /* Désactiver comportements indésirables */
     }
     input[type="text"] {
       width: 100%;
@@ -169,7 +171,14 @@
       const checkboxes = container.querySelectorAll('input[type="checkbox"]');
       checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
-          document.getElementById('calculateButton').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => {
+            const calculateButton = document.getElementById('calculateButton');
+            const rect = calculateButton.getBoundingClientRect();
+            window.scrollTo({
+              top: window.scrollY + rect.top - 100, // Ajuster pour centrer
+              behavior: 'smooth'
+            });
+          }, 100); // Délai pour éviter conflits tactiles
         });
       });
     }
@@ -187,11 +196,23 @@
         if (parts[1].length > 2) return;
         // Défilement automatique après deux décimales
         if (parts[1].length === 2) {
-          if (inputId === 'prixTotal') {
-            document.getElementById('argentClient').scrollIntoView({ behavior: 'smooth', block: 'center' });
-          } else if (inputId === 'argentClient') {
-            document.getElementById('denominations').scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
+          setTimeout(() => {
+            if (inputId === 'prixTotal') {
+              const argentClient = document.getElementById('argentClient');
+              const rect = argentClient.getBoundingClientRect();
+              window.scrollTo({
+                top: window.scrollY + rect.top - 100,
+                behavior: 'smooth'
+              });
+            } else if (inputId === 'argentClient') {
+              const denominations = document.getElementById('denominations');
+              const rect = denominations.getBoundingClientRect();
+              window.scrollTo({
+                top: window.scrollY + rect.top - 100,
+                behavior: 'smooth'
+              });
+            }
+          }, 100); // Délai pour compatibilité Chrome Android
         }
       }
 
@@ -234,7 +255,6 @@
       }
 
       resultDiv.innerHTML = '<h3 class="text-lg font-semibold text-gray-700">Rendu :</h3>';
-      // Trier les dénominations par ordre décroissant
       const sortedDenoms = Object.keys(result).sort((a, b) => parseFloat(b) - parseFloat(a));
       for (let denom of sortedDenoms) {
         const d = denominations.find(x => x.value == denom);
