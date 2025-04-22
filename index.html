@@ -12,39 +12,39 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      padding: 20px;
+      padding: 16px;
       font-family: Arial, sans-serif;
     }
     .container {
       background: white;
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 8px;
+      padding: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       width: 100%;
-      max-width: 400px;
+      max-width: 320px;
       overflow-anchor: none;
       overscroll-behavior: none;
     }
     input[type="text"] {
       width: 100%;
-      padding: 10px;
-      font-size: 1.2rem;
+      padding: 6px;
+      font-size: 1rem;
       border: 2px solid #d1d5db;
-      border-radius: 8px;
+      border-radius: 6px;
       text-align: center;
       pointer-events: none;
     }
     .numpad {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-top: 8px;
+      gap: 6px;
+      margin-top: 6px;
     }
     .numpad button, .action {
-      padding: 12px;
-      font-size: 1.2rem;
+      padding: 8px;
+      font-size: 1rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
       background-color: #e5e7eb;
     }
@@ -54,45 +54,50 @@
     .denom-item {
       display: flex;
       align-items: center;
-      margin: 5px 0;
+      margin: 4px 0;
     }
     .denom-item input {
-      margin-right: 10px;
-      width: 20px;
-      height: 20px;
+      margin-right: 8px;
+      width: 16px;
+      height: 16px;
+    }
+    .denom-item span {
+      font-size: 0.875rem;
     }
     .error {
       color: red;
       text-align: center;
-      margin-top: 10px;
+      margin-top: 8px;
+      font-size: 0.875rem;
     }
     .result-item {
       background: #f9fafb;
-      margin: 5px 0;
-      padding: 10px;
-      border-radius: 8px;
+      margin: 4px 0;
+      padding: 8px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
+      font-size: 0.875rem;
     }
     .circle {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 2px 6px;
+      padding: 2px 4px;
       border-radius: 50%;
       border: 1px solid #6b7280;
-      margin-right: 8px;
-      font-size: 1rem;
+      margin-right: 6px;
+      font-size: 0.875rem;
     }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1 class="text-2xl font-bold text-center mb-4">Rendu de Monnaie</h1>
+    <h1 class="text-xl font-bold text-center mb-3">Rendu de Monnaie</h1>
 
-    <div class="mb-4">
-      <label class="block mb-1 font-semibold text-gray-700">Prix Total (€)</label>
+    <div class="mb-3">
+      <label class="block mb-1 font-semibold text-gray-700 text-sm">Prix Total (€)</label>
       <input type="text" id="prixTotal" readonly value="0.00">
       <div class="numpad">
         <button onclick="appendNumber('1', 'prixTotal')">1</button>
@@ -110,8 +115,8 @@
       </div>
     </div>
 
-    <div class="mb-4">
-      <label class="block mb-1 font-semibold text-gray-700">Argent du Client (€)</label>
+    <div class="mb-3">
+      <label class="block mb-1 font-semibold text-gray-700 text-sm">Argent du Client (€)</label>
       <input type="text" id="argentClient" readonly value="0.00">
       <div class="numpad">
         <button onclick="appendNumber('1', 'argentClient')">1</button>
@@ -129,13 +134,13 @@
       </div>
     </div>
 
-    <h2 class="text-lg font-semibold text-gray-700 mb-2">Dénominations Disponibles</h2>
-    <div id="denominations" class="mb-4"></div>
+    <h2 class="text-base font-semibold text-gray-700 mb-2">Dénominations Disponibles</h2>
+    <div id="denominations" class="mb-3"></div>
 
     <button id="calculateButton" onclick="calculateChange()" class="action bg-blue-600 text-white mt-2 hover:bg-blue-700">Calculer</button>
     <button onclick="resetForm()" class="action bg-gray-600 text-white mt-2 hover:bg-gray-700">Réinitialiser</button>
 
-    <div id="changeResult" class="mt-4"></div>
+    <div id="changeResult" class="mt-3"></div>
   </div>
 
   <script>
@@ -169,20 +174,6 @@
         div.innerHTML = `<input type="checkbox" value="${d.value}" checked><span>${label}</span>`;
         container.appendChild(div);
       });
-
-      const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-          setTimeout(() => {
-            const calculateButton = document.getElementById('calculateButton');
-            const rect = calculateButton.getBoundingClientRect();
-            window.scrollTo({
-              top: window.scrollY + rect.top - 150,
-              behavior: 'smooth'
-            });
-          }, 100);
-        });
-      });
     }
 
     function appendNumber(char, inputId) {
@@ -208,7 +199,7 @@
             const nextElement = document.getElementById(nextId);
             const rect = nextElement.getBoundingClientRect();
             window.scrollTo({
-              top: window.scrollY + rect.top - 150, // Ajusté pour mode paysage
+              top: window.scrollY + rect.top - 150,
               behavior: 'smooth'
             });
           }
@@ -230,31 +221,58 @@
         resultDiv.innerHTML = '<p class="error">Montant insuffisant !</p>';
         return;
       }
-      change = Math.round(change * 100) / 100;
+      // Convertir en centimes pour précision
+      change = Math.round(change * 100);
 
       const selectedDenoms = Array.from(document.querySelectorAll('#denominations input:checked'))
         .map(input => parseFloat(input.value))
+        .map(denom => Math.round(denom * 100)) // Convertir en centimes
         .sort((a, b) => b - a);
 
-      const result = {};
-      let remaining = change;
-      for (let denom of selectedDenoms) {
-        const count = Math.floor(remaining / denom);
-        if (count > 0) {
-          result[denom] = count;
-          remaining = Math.round((remaining - count * denom) * 100) / 100;
+      // Algorithme de programmation dynamique
+      const dp = Array(change + 1).fill(null);
+      dp[0] = { count: 0, combo: {} };
+
+      for (let i = 1; i <= change; i++) {
+        let bestScore = Infinity;
+        let bestCombo = null;
+        let bestCount = Infinity;
+
+        for (let denom of selectedDenoms) {
+          if (denom <= i && dp[i - denom]) {
+            const prevCombo = dp[i - denom].combo;
+            const newCombo = { ...prevCombo, [denom / 100]: (prevCombo[denom / 100] || 0) + 1 };
+            const count = dp[i - denom].count + 1;
+
+            // Calculer le score : nombre total + pénalité pour quantités élevées
+            let maxCount = Math.max(...Object.values(newCombo));
+            let penalty = maxCount > 20 ? (maxCount - 20) * 20 : 0; // Pénalité si > 20 unités
+            let score = count + penalty;
+
+            if (score < bestScore || (score === bestScore && count < bestCount)) {
+              bestScore = score;
+              bestCombo = newCombo;
+              bestCount = count;
+            }
+          }
+        }
+
+        if (bestCombo) {
+          dp[i] = { count: bestCount, combo: bestCombo };
         }
       }
 
-      if (remaining > 0) {
+      if (!dp[change]) {
         resultDiv.innerHTML = '<p class="error">Monnaie exacte impossible !</p>';
         return;
       }
 
-      resultDiv.innerHTML = '<h3 class="text-lg font-semibold text-gray-700">Rendu :</h3>';
+      // Afficher la combinaison
+      const result = dp[change].combo;
+      resultDiv.innerHTML = '<h3 class="text-base font-semibold text-gray-700">Rendu :</h3>';
       const sortedDenoms = Object.keys(result).sort((a, b) => parseFloat(b) - parseFloat(a));
       for (let denom of sortedDenoms) {
-        const d = denominations.find(x => x.value == denom);
+        const d = denominations.find(x => x.value == parseFloat(denom));
         const label = d.value >= 1 ? `${d.value}€` : `${Math.round(d.value * 100)} centimes`;
         const total = (result[denom] * d.value).toFixed(2);
         resultDiv.innerHTML += `<div class="result-item ${d.colorClass}">${result[denom]} x <span class="circle ${d.colorClass}">${label}</span> = ${total}€</div>`;
@@ -266,6 +284,13 @@
       document.getElementById('argentClient').value = '0.00';
       document.getElementById('changeResult').innerHTML = '';
       renderDenominations();
+      // Remonter en haut de la page
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }, 100);
     }
 
     renderDenominations();
