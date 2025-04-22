@@ -40,7 +40,7 @@
       gap: 8px;
       margin-top: 8px;
     }
-    .numpad button, .action, .ok-button {
+    .numpad button, .action {
       padding: 12px;
       font-size: 1.2rem;
       border: none;
@@ -48,16 +48,8 @@
       cursor: pointer;
       background-color: #e5e7eb;
     }
-    .numpad button:hover, .action:hover, .ok-button:hover {
+    .numpad button:hover, .action:hover {
       background-color: #d1d5db;
-    }
-    .ok-button {
-      background-color: #10b981;
-      color: white;
-      margin-top: 8px;
-    }
-    .ok-button:hover {
-      background-color: #059669;
     }
     .denom-item {
       display: flex;
@@ -116,7 +108,6 @@
         <button onclick="appendNumber('0', 'prixTotal')">0</button>
         <button onclick="clearInput('prixTotal')">C</button>
       </div>
-      <button class="ok-button" onclick="scrollToNext('argentClient')">OK</button>
     </div>
 
     <div class="mb-4">
@@ -136,7 +127,6 @@
         <button onclick="appendNumber('0', 'argentClient')">0</button>
         <button onclick="clearInput('argentClient')">C</button>
       </div>
-      <button class="ok-button" onclick="scrollToNext('denominations')">OK</button>
     </div>
 
     <h2 class="text-lg font-semibold text-gray-700 mb-2">Dénominations Disponibles</h2>
@@ -164,6 +154,9 @@
       { value: 0.01, type: 'pièce', colorClass: 'bg-red-300' }
     ];
 
+    let lastInputTime = 0;
+    let lastInputId = null;
+
     function renderDenominations() {
       const container = document.getElementById('denominations');
       container.innerHTML = '';
@@ -184,7 +177,7 @@
             const calculateButton = document.getElementById('calculateButton');
             const rect = calculateButton.getBoundingClientRect();
             window.scrollTo({
-              top: window.scrollY + rect.top - 100,
+              top: window.scrollY + rect.top - 150,
               behavior: 'smooth'
             });
           }, 100);
@@ -201,28 +194,30 @@
       value += char;
 
       input.value = value || '0.00';
+
+      // Mettre à jour le temps et l’ID du dernier clic
+      lastInputTime = Date.now();
+      lastInputId = inputId;
+
+      // Vérifier après 1 seconde si la saisie est terminée
+      setTimeout(() => {
+        if (Date.now() - lastInputTime >= 1000 && lastInputId === inputId) {
+          const parsedValue = parseFloat(input.value);
+          if (!isNaN(parsedValue) && parsedValue > 0) {
+            const nextId = inputId === 'prixTotal' ? 'argentClient' : 'denominations';
+            const nextElement = document.getElementById(nextId);
+            const rect = nextElement.getBoundingClientRect();
+            window.scrollTo({
+              top: window.scrollY + rect.top - 150, // Ajusté pour mode paysage
+              behavior: 'smooth'
+            });
+          }
+        }
+      }, 1000);
     }
 
     function clearInput(inputId) {
       document.getElementById(inputId).value = '0.00';
-    }
-
-    function scrollToNext(nextId) {
-      const input = document.getElementById(nextId === 'denominations' ? 'argentClient' : 'prixTotal');
-      const value = input.value;
-      if (!value || isNaN(parseFloat(value))) {
-        alert('Veuillez entrer un montant valide.');
-        return;
-      }
-
-      setTimeout(() => {
-        const nextElement = document.getElementById(nextId);
-        const rect = nextElement.getBoundingClientRect();
-        window.scrollTo({
-          top: window.scrollY + rect.top - 100,
-          behavior: 'smooth'
-        });
-      }, 100);
     }
 
     function calculateChange() {
