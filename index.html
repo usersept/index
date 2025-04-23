@@ -89,22 +89,21 @@
       margin-right: 6px;
       font-size: 0.875rem;
     }
-    .reverse-controls {
-      display: flex;
-      align-items: center;
-      margin-right: 8px;
+    .reverse-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin-top: 6px;
     }
-    .reverse-controls button {
-      width: 24px;
-      height: 24px;
-      padding: 0;
-      font-size: 0.875rem;
-      line-height: 24px;
-      text-align: center;
+    .reverse-grid button {
+      padding: 8px;
+      font-size: 1rem;
+      font-weight: bold;
     }
     .reverse-count {
-      margin: 0 8px;
-      font-size: 0.875rem;
+      font-size: 1rem;
+      font-weight: bold;
+      margin-left: 4px;
     }
     .header {
       display: flex;
@@ -171,7 +170,8 @@
     <!-- Mode Calcul Inverse -->
     <div id="reverseMode" class="hidden">
       <h2 class="text-base font-semibold text-gray-700 mb-2">Compter les Dénominations</h2>
-      <div id="reverseDenominations" class="mb-3"></div>
+      <div id="reverseDenominations" class="reverse-grid"></div>
+      <button onclick="undoLast()" class="action bg-red-600 text-white mt-2 hover:bg-red-700">Annuler dernier</button>
       <div id="reverseResult" class="mt-3"></div>
     </div>
 
@@ -197,9 +197,12 @@
       { value: 0.01, type: 'pièce', colorClass: 'bg-red-300' }
     ];
 
+    const reverseDenominations = denominations; // Toutes les dénominations
     let isReverseMode = false;
     let lastInputTime = 0;
     let lastInputId = null;
+    let reverseCounts = {};
+    let reverseHistory = [];
 
     function renderDenominations() {
       const container = document.getElementById('denominations');
@@ -218,29 +221,32 @@
     function renderReverseDenominations() {
       const container = document.getElementById('reverseDenominations');
       container.innerHTML = '';
-      denominations.forEach(d => {
-        const label = d.value >= 1 
-          ? `${d.value}€ (${d.type})`
-          : `${Math.round(d.value * 100)} centimes (${d.type})`;
-        const div = document.createElement('div');
-        div.className = 'denom-item';
-        div.innerHTML = `
-          <div class="reverse-controls">
-            <button onclick="updateReverseCount('${d.value}', -1)">–</button>
-            <span class="reverse-count" data-value="${d.value}">x0</span>
-            <button onclick="updateReverseCount('${d.value}', 1)">+</button>
-          </div>
-          <span>${label}</span>
-        `;
-        container.appendChild(div);
+      reverseCounts = {};
+      reverseDenominations.forEach(d => {
+        reverseCounts[d.value] = 0;
+        const label = d.value >= 1 ? `${d.value}€` : `${Math.round(d.value * 100)}c`;
+        const button = document.createElement('button');
+        button.className = 'action';
+        button.innerHTML = `${label} <span class="reverse-count" data-value="${d.value}">x0</span>`;
+        button.onclick = () => addDenomination(d.value);
+        container.appendChild(button);
       });
     }
 
-    function updateReverseCount(value, delta) {
+    function addDenomination(value) {
+      reverseCounts[value] = (reverseCounts[value] || 0) + 1;
+      reverseHistory.push(value);
       const span = document.querySelector(`.reverse-count[data-value="${value}"]`);
-      let count = parseInt(span.textContent.replace('x', '')) || 0;
-      count = Math.max(0, count + delta);
-      span.textContent = `x${count}`;
+      span.textContent = `x${reverseCounts[value]}`;
+      calculateReverseTotal();
+    }
+
+    function undoLast() {
+      if (reverseHistory.length === 0) return;
+      const lastValue = reverseHistory.pop();
+      reverseCounts[lastValue] = Math.max(0, (reverseCounts[lastValue] || 0) - 1);
+      const span = document.querySelector(`.reverse-count[data-value="${lastValue}"]`);
+      span.textContent = `x${reverseCounts[lastValue]}`;
       calculateReverseTotal();
     }
 
@@ -343,24 +349,18 @@
 
     function calculateReverseTotal() {
       if (!isReverseMode) return;
-      const spans = document.querySelectorAll('#reverseDenominations .reverse-count');
       let total = 0;
       const resultDiv = document.getElementById('reverseResult');
-      resultDiv.innerHTML = '<h3 class="text-base font-semibold text-gray-700">Total :</h3>';
+      resultDiv.innerHTML = '';
 
-      spans.forEach(span => {
-        const count = parseInt(span.textContent.replace('x', '')) || 0;
-        const value = parseFloat(span.dataset.value);
-        const subtotal = count * value;
+      Object.keys(reverseCounts).forEach(value => {
+        const count = reverseCounts[value] || 0;
+        const numValue = parseFloat(value);
+        const subtotal = count * numValue;
         total += subtotal;
-        if (count > 0) {
-          const d = denominations.find(x => x.value === value);
-          const label = d.value >= 1 ? `${d.value}€` : `${Math.round(d.value * 100)} centimes`;
-          resultDiv.innerHTML += `<div class="result-item ${d.colorClass}">${count} x <span class="circle ${d.colorClass}">${label}</span> = ${(subtotal).toFixed(2)}€</div>`;
-        }
       });
 
-      resultDiv.innerHTML += `<div class="result-item font-bold">Total : ${total.toFixed(2)}€</div>`;
+      resultDiv.innerHTML = `<div class="result-item font-bold">Total : ${total.toFixed(2)}€</div>`;
     }
 
     function toggleMode() {
@@ -389,10 +389,9 @@
 
     function resetForm() {
       if (isReverseMode) {
-        document.querySelectorAll('#reverseDenominations .reverse-count').forEach(span => {
-          span.textContent = 'x0';
-        });
-        document.getElementById('reverseResult').innerHTML = '';
+        reverseCounts = {};
+        reverseHistory = [];
+        renderReverseDenominations();
         calculateReverseTotal();
       } else {
         document.getElementById('prixTotal').value = '0.00';
