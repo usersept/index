@@ -197,12 +197,13 @@
       { value: 0.01, type: 'pièce', colorClass: 'bg-red-300' }
     ];
 
-    const reverseDenominations = denominations; // Toutes les dénominations
+    const reverseDenominations = denominations;
     let isReverseMode = false;
     let lastInputTime = 0;
     let lastInputId = null;
     let reverseCounts = {};
     let reverseHistory = [];
+    let lastReverseTotal = 0;
 
     function renderDenominations() {
       const container = document.getElementById('denominations');
@@ -360,6 +361,7 @@
         total += subtotal;
       });
 
+      lastReverseTotal = total;
       resultDiv.innerHTML = `<div class="result-item font-bold">Total : ${total.toFixed(2)}€</div>`;
     }
 
@@ -383,6 +385,22 @@
         reverseButton.textContent = 'Mode Inverse';
         document.getElementById('reverseResult').innerHTML = '';
         renderDenominations();
+        // Insérer le dernier total calculé dans Argent du Client
+        const argentClientInput = document.getElementById('argentClient');
+        argentClientInput.value = lastReverseTotal.toFixed(2);
+        // Simuler une saisie pour déclencher le défilement
+        lastInputTime = Date.now();
+        lastInputId = 'argentClient';
+        setTimeout(() => {
+          if (Date.now() - lastInputTime >= 1000 && lastInputId === 'argentClient') {
+            const parsedValue = parseFloat(argentClientInput.value);
+            if (!isNaN(parsedValue) && parsedValue > 0) {
+              const nextElement = document.getElementById('denominations');
+              nextElement.scrollIntoView({ block: 'center', behavior: 'smooth' });
+              console.log('Scrolling to denominations');
+            }
+          }
+        }, 1000);
       }
       resetForm();
     }
@@ -391,11 +409,15 @@
       if (isReverseMode) {
         reverseCounts = {};
         reverseHistory = [];
+        lastReverseTotal = 0;
         renderReverseDenominations();
         calculateReverseTotal();
       } else {
         document.getElementById('prixTotal').value = '0.00';
-        document.getElementById('argentClient').value = '0.00';
+        // Ne réinitialiser Argent du Client que si pas de lastReverseTotal
+        if (lastReverseTotal === 0) {
+          document.getElementById('argentClient').value = '0.00';
+        }
         document.getElementById('changeResult').innerHTML = '';
         renderDenominations();
       }
