@@ -388,19 +388,8 @@
         // Insérer le dernier total calculé dans Argent du Client
         const argentClientInput = document.getElementById('argentClient');
         argentClientInput.value = lastReverseTotal.toFixed(2);
-        // Simuler une saisie pour déclencher le défilement
-        lastInputTime = Date.now();
-        lastInputId = 'argentClient';
-        setTimeout(() => {
-          if (Date.now() - lastInputTime >= 1000 && lastInputId === 'argentClient') {
-            const parsedValue = parseFloat(argentClientInput.value);
-            if (!isNaN(parsedValue) && parsedValue > 0) {
-              const nextElement = document.getElementById('denominations');
-              nextElement.scrollIntoView({ block: 'center', behavior: 'smooth' });
-              console.log('Scrolling to denominations');
-            }
-          }
-        }, 1000);
+        // Remonter en haut pour centrer Prix Total
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       resetForm();
     }
