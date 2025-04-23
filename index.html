@@ -339,13 +339,16 @@
 
       const result = dp[change].combo;
       resultDiv.innerHTML = '<h3 class="text-base font-semibold text-gray-700">Rendu :</h3>';
+      let totalChange = 0;
       const sortedDenoms = Object.keys(result).sort((a, b) => parseFloat(b) - parseFloat(a));
       for (let denom of sortedDenoms) {
         const d = denominations.find(x => x.value == parseFloat(denom));
         const label = d.value >= 1 ? `${d.value}€` : `${Math.round(d.value * 100)} centimes`;
         const total = (result[denom] * d.value).toFixed(2);
+        totalChange += result[denom] * d.value;
         resultDiv.innerHTML += `<div class="result-item ${d.colorClass}">${result[denom]} x <span class="circle ${d.colorClass}">${label}</span> = ${total}€</div>`;
       }
+      resultDiv.innerHTML += `<div class="result-item font-bold">Total : ${totalChange.toFixed(2)}€</div>`;
     }
 
     function calculateReverseTotal() {
