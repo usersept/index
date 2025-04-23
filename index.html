@@ -56,7 +56,7 @@
       align-items: center;
       margin: 4px 0;
     }
-    .denom-item input {
+    .denom-item input[type="checkbox"] {
       margin-right: 8px;
       width: 16px;
       height: 16px;
@@ -89,55 +89,93 @@
       margin-right: 6px;
       font-size: 0.875rem;
     }
+    .reverse-controls {
+      display: flex;
+      align-items: center;
+      margin-right: 8px;
+    }
+    .reverse-controls button {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      font-size: 0.875rem;
+      line-height: 24px;
+      text-align: center;
+    }
+    .reverse-count {
+      margin: 0 8px;
+      font-size: 0.875rem;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <h1 class="text-xl font-bold text-center mb-3">Rendu de Monnaie</h1>
-
-    <div class="mb-3">
-      <label class="block mb-1 font-semibold text-gray-700 text-sm">Prix Total (€)</label>
-      <input type="text" id="prixTotal" readonly value="0.00">
-      <div class="numpad">
-        <button onclick="appendNumber('1', 'prixTotal')">1</button>
-        <button onclick="appendNumber('2', 'prixTotal')">2</button>
-        <button onclick="appendNumber('3', 'prixTotal')">3</button>
-        <button onclick="appendNumber('4', 'prixTotal')">4</button>
-        <button onclick="appendNumber('5', 'prixTotal')">5</button>
-        <button onclick="appendNumber('6', 'prixTotal')">6</button>
-        <button onclick="appendNumber('7', 'prixTotal')">7</button>
-        <button onclick="appendNumber('8', 'prixTotal')">8</button>
-        <button onclick="appendNumber('9', 'prixTotal')">9</button>
-        <button onclick="appendNumber('.', 'prixTotal')">.</button>
-        <button onclick="appendNumber('0', 'prixTotal')">0</button>
-        <button onclick="clearInput('prixTotal')">C</button>
-      </div>
+    <div class="header">
+      <h1 class="text-xl font-bold">Calcul de Monnaie</h1>
+      <button id="reverseButton" onclick="toggleMode()" class="action bg-green-600 text-white text-sm px-3 py-1 hover:bg-green-700">Mode Inverse</button>
     </div>
 
-    <div class="mb-3">
-      <label class="block mb-1 font-semibold text-gray-700 text-sm">Argent du Client (€)</label>
-      <input type="text" id="argentClient" readonly value="0.00">
-      <div class="numpad">
-        <button onclick="appendNumber('1', 'argentClient')">1</button>
-        <button onclick="appendNumber('2', 'argentClient')">2</button>
-        <button onclick="appendNumber('3', 'argentClient')">3</button>
-        <button onclick="appendNumber('4', 'argentClient')">4</button>
-        <button onclick="appendNumber('5', 'argentClient')">5</button>
-        <button onclick="appendNumber('6', 'argentClient')">6</button>
-        <button onclick="appendNumber('7', 'argentClient')">7</button>
-        <button onclick="appendNumber('8', 'argentClient')">8</button>
-        <button onclick="appendNumber('9', 'argentClient')">9</button>
-        <button onclick="appendNumber('.', 'argentClient')">.</button>
-        <button onclick="appendNumber('0', 'argentClient')">0</button>
-        <button onclick="clearInput('argentClient')">C</button>
+    <!-- Mode Rendu de Monnaie -->
+    <div id="normalMode">
+      <div class="mb-3">
+        <label class="block mb-1 font-semibold text-gray-700 text-sm">Prix Total (€)</label>
+        <input type="text" id="prixTotal" readonly value="0.00">
+        <div class="numpad">
+          <button onclick="appendNumber('1', 'prixTotal')">1</button>
+          <button onclick="appendNumber('2', 'prixTotal')">2</button>
+          <button onclick="appendNumber('3', 'prixTotal')">3</button>
+          <button onclick="appendNumber('4', 'prixTotal')">4</button>
+          <button onclick="appendNumber('5', 'prixTotal')">5</button>
+          <button onclick="appendNumber('6', 'prixTotal')">6</button>
+          <button onclick="appendNumber('7', 'prixTotal')">7</button>
+          <button onclick="appendNumber('8', 'prixTotal')">8</button>
+          <button onclick="appendNumber('9', 'prixTotal')">9</button>
+          <button onclick="appendNumber('.', 'prixTotal')">.</button>
+          <button onclick="appendNumber('0', 'prixTotal')">0</button>
+          <button onclick="clearInput('prixTotal')">C</button>
+        </div>
       </div>
+
+      <div class="mb-3">
+        <label class="block mb-1 font-semibold text-gray-700 text-sm">Argent du Client (€)</label>
+        <input type="text" id="argentClient" readonly value="0.00">
+        <div class="numpad">
+          <button onclick="appendNumber('1', 'argentClient')">1</button>
+          <button onclick="appendNumber('2', 'argentClient')">2</button>
+          <button onclick="appendNumber('3', 'argentClient')">3</button>
+          <button onclick="appendNumber('4', 'argentClient')">4</button>
+          <button onclick="appendNumber('5', 'argentClient')">5</button>
+          <button onclick="appendNumber('6', 'argentClient')">6</button>
+          <button onclick="appendNumber('7', 'argentClient')">7</button>
+          <button onclick="appendNumber('8', 'argentClient')">8</button>
+          <button onclick="appendNumber('9', 'argentClient')">9</button>
+          <button onclick="appendNumber('.', 'argentClient')">.</button>
+          <button onclick="appendNumber('0', 'argentClient')">0</button>
+          <button onclick="clearInput('argentClient')">C</button>
+        </div>
+      </div>
+
+      <h2 class="text-base font-semibold text-gray-700 mb-2">Dénominations Disponibles</h2>
+      <div id="denominations" class="mb-3"></div>
+
+      <button id="calculateButton" onclick="calculateChange()" class="action bg-blue-600 text-white mt-2 hover:bg-blue-700">Calculer</button>
     </div>
 
-    <h2 class="text-base font-semibold text-gray-700 mb-2">Dénominations Disponibles</h2>
-    <div id="denominations" class="mb-3"></div>
+    <!-- Mode Calcul Inverse -->
+    <div id="reverseMode" class="hidden">
+      <h2 class="text-base font-semibold text-gray-700 mb-2">Compter les Dénominations</h2>
+      <div id="reverseDenominations" class="mb-3"></div>
+      <div id="reverseResult" class="mt-3"></div>
+    </div>
 
-    <button id="calculateButton" onclick="calculateChange()" class="action bg-blue-600 text-white mt-2 hover:bg-blue-700">Calculer</button>
+    <!-- Bouton Réinitialiser -->
     <button onclick="resetForm()" class="action bg-gray-600 text-white mt-2 hover:bg-gray-700">Réinitialiser</button>
 
     <div id="changeResult" class="mt-3"></div>
@@ -159,6 +197,7 @@
       { value: 0.01, type: 'pièce', colorClass: 'bg-red-300' }
     ];
 
+    let isReverseMode = false;
     let lastInputTime = 0;
     let lastInputId = null;
 
@@ -176,7 +215,37 @@
       });
     }
 
+    function renderReverseDenominations() {
+      const container = document.getElementById('reverseDenominations');
+      container.innerHTML = '';
+      denominations.forEach(d => {
+        const label = d.value >= 1 
+          ? `${d.value}€ (${d.type})`
+          : `${Math.round(d.value * 100)} centimes (${d.type})`;
+        const div = document.createElement('div');
+        div.className = 'denom-item';
+        div.innerHTML = `
+          <div class="reverse-controls">
+            <button onclick="updateReverseCount('${d.value}', -1)">–</button>
+            <span class="reverse-count" data-value="${d.value}">x0</span>
+            <button onclick="updateReverseCount('${d.value}', 1)">+</button>
+          </div>
+          <span>${label}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function updateReverseCount(value, delta) {
+      const span = document.querySelector(`.reverse-count[data-value="${value}"]`);
+      let count = parseInt(span.textContent.replace('x', '')) || 0;
+      count = Math.max(0, count + delta);
+      span.textContent = `x${count}`;
+      calculateReverseTotal();
+    }
+
     function appendNumber(char, inputId) {
+      if (isReverseMode) return;
       const input = document.getElementById(inputId);
       let value = input.value;
 
@@ -186,18 +255,15 @@
 
       input.value = value || '0.00';
 
-      // Mettre à jour le temps et l’ID du dernier clic
       lastInputTime = Date.now();
       lastInputId = inputId;
 
-      // Vérifier après 1 seconde si la saisie est terminée
       setTimeout(() => {
         if (Date.now() - lastInputTime >= 1000 && lastInputId === inputId) {
           const parsedValue = parseFloat(input.value);
           if (!isNaN(parsedValue) && parsedValue > 0) {
             const nextId = inputId === 'prixTotal' ? 'argentClient' : 'denominations';
             const nextElement = document.getElementById(nextId);
-            // Centrer la section entière
             nextElement.scrollIntoView({ block: 'center', behavior: 'smooth' });
             console.log(`Scrolling to ${nextId}`);
           }
@@ -206,28 +272,28 @@
     }
 
     function clearInput(inputId) {
+      if (isReverseMode) return;
       document.getElementById(inputId).value = '0.00';
     }
 
     function calculateChange() {
+      if (isReverseMode) return;
       const prixTotal = parseFloat(document.getElementById('prixTotal').value) || 0;
       const argentClient = parseFloat(document.getElementById('argentClient').value) || 0;
       let change = argentClient - prixTotal;
 
       const resultDiv = document.getElementById('changeResult');
       if (change < 0) {
-        resultDiv.innerHTML = '<p class="error">Monnaie insuffisant !</p>';
+        resultDiv.innerHTML = '<p class="error">Montant insuffisant !</p>';
         return;
       }
-      // Convertir en centimes pour précision
       change = Math.round(change * 100);
 
       const selectedDenoms = Array.from(document.querySelectorAll('#denominations input:checked'))
         .map(input => parseFloat(input.value))
-        .map(denom => Math.round(denom * 100)) // Convertir en centimes
+        .map(denom => Math.round(denom * 100))
         .sort((a, b) => b - a);
 
-      // Algorithme de programmation dynamique
       const dp = Array(change + 1).fill(null);
       dp[0] = { count: 0, combo: {} };
 
@@ -242,9 +308,8 @@
             const newCombo = { ...prevCombo, [denom / 100]: (prevCombo[denom / 100] || 0) + 1 };
             const count = dp[i - denom].count + 1;
 
-            // Calculer le score : nombre total + pénalité pour quantités élevées
             let maxCount = Math.max(...Object.values(newCombo));
-            let penalty = maxCount > 20 ? (maxCount - 20) * 20 : 0; // Pénalité si > 20 unités
+            let penalty = maxCount > 20 ? (maxCount - 20) * 20 : 0;
             let score = count + penalty;
 
             if (score < bestScore || (score === bestScore && count < bestCount)) {
@@ -265,7 +330,6 @@
         return;
       }
 
-      // Afficher la combinaison
       const result = dp[change].combo;
       resultDiv.innerHTML = '<h3 class="text-base font-semibold text-gray-700">Rendu :</h3>';
       const sortedDenoms = Object.keys(result).sort((a, b) => parseFloat(b) - parseFloat(a));
@@ -277,12 +341,65 @@
       }
     }
 
+    function calculateReverseTotal() {
+      if (!isReverseMode) return;
+      const spans = document.querySelectorAll('#reverseDenominations .reverse-count');
+      let total = 0;
+      const resultDiv = document.getElementById('reverseResult');
+      resultDiv.innerHTML = '<h3 class="text-base font-semibold text-gray-700">Total :</h3>';
+
+      spans.forEach(span => {
+        const count = parseInt(span.textContent.replace('x', '')) || 0;
+        const value = parseFloat(span.dataset.value);
+        const subtotal = count * value;
+        total += subtotal;
+        if (count > 0) {
+          const d = denominations.find(x => x.value === value);
+          const label = d.value >= 1 ? `${d.value}€` : `${Math.round(d.value * 100)} centimes`;
+          resultDiv.innerHTML += `<div class="result-item ${d.colorClass}">${count} x <span class="circle ${d.colorClass}">${label}</span> = ${(subtotal).toFixed(2)}€</div>`;
+        }
+      });
+
+      resultDiv.innerHTML += `<div class="result-item font-bold">Total : ${total.toFixed(2)}€</div>`;
+    }
+
+    function toggleMode() {
+      isReverseMode = !isReverseMode;
+      const normalMode = document.getElementById('normalMode');
+      const reverseMode = document.getElementById('reverseMode');
+      const reverseButton = document.getElementById('reverseButton');
+      const changeResult = document.getElementById('changeResult');
+
+      if (isReverseMode) {
+        normalMode.classList.add('hidden');
+        reverseMode.classList.remove('hidden');
+        reverseButton.textContent = 'Mode Normal';
+        changeResult.innerHTML = '';
+        renderReverseDenominations();
+        calculateReverseTotal();
+      } else {
+        reverseMode.classList.add('hidden');
+        normalMode.classList.remove('hidden');
+        reverseButton.textContent = 'Mode Inverse';
+        document.getElementById('reverseResult').innerHTML = '';
+        renderDenominations();
+      }
+      resetForm();
+    }
+
     function resetForm() {
-      document.getElementById('prixTotal').value = '0.00';
-      document.getElementById('argentClient').value = '0.00';
-      document.getElementById('changeResult').innerHTML = '';
-      renderDenominations();
-      // Remonter en haut de la page
+      if (isReverseMode) {
+        document.querySelectorAll('#reverseDenominations .reverse-count').forEach(span => {
+          span.textContent = 'x0';
+        });
+        document.getElementById('reverseResult').innerHTML = '';
+        calculateReverseTotal();
+      } else {
+        document.getElementById('prixTotal').value = '0.00';
+        document.getElementById('argentClient').value = '0.00';
+        document.getElementById('changeResult').innerHTML = '';
+        renderDenominations();
+      }
       setTimeout(() => {
         window.scrollTo({
           top: 0,
